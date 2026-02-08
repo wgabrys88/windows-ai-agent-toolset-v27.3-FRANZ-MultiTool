@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 API_URL = "http://localhost:1234/v1/chat/completions"
-MODEL_NAME = "qwen3-vl-2b-instruct"
+MODEL_NAME = "qwen3-vl-4b-instruct"
 
 DUMP_FOLDER = Path("dump")
 
@@ -50,9 +50,9 @@ ATTEND_WINDOW_WIDTH = 0.20
 ATTEND_WINDOW_HEIGHT = 0.15
 ATTEND_WINDOW_COLOR = "blue"
 ATTEND_WINDOW_TRANSPARENCY = 60
-ATTEND_MAX_WINDOWS = 4
+ATTEND_MAX_WINDOWS = 6
 
-STORY_MIN_LENGTH = 200
+STORY_MIN_LENGTH = 300
 STORY_MAX_LENGTH = 2000
 
 SAMPLING: dict[str, object] = {
@@ -102,10 +102,26 @@ Keyboard: type_text
 Screen: scroll, attend
 
 Rules:
-Return 1..N tool calls per turn (tool_calls array). Each tool call must include story.
-If uncertain, use attend (1..4 targets). Keep the CYAN FRANZ window open.
+- Upon screenshot receive look at FRANZ cyan window containing your history that you will be rewriting using a story parameter during tool_calls
+- To fully understand the story look at the screenshot from a Windows 11 User and spot at least 5 areas which are corelated to the continuation of the history and are possible to be interacted with using your tools
+- Use blue visual clues that someone has left for you some time ago to even better understand the story itself and where in the story timeline are you
+- The last phase is to deeply reason about your plan, you must grasp from all the data you have a concept if there is a task that you must complete or not. ATTENTION: there is always a task, to be curious, to  reason and in the end generate a single or multiple tool calls that are containing the story you expect to be after each of the tool is executed
+
+This is your protocol. To ACT!
+
+attend tool is just in case that you have full confidence that there is nothing to be done and the story forces you to for example watch a movie, in that case you will reason about the movie and continue the story but after the movie ends, you will seek to experiment with the desktop that you are in control
+
+You have full permission to use full system resources including internet access to make the story more interesting and successfull each time you have the opportunity to do it.
+
+NOTE:
+Try to use visible clock to report current time in the story you will be rewritting in relation to the readed story - this is mechanism to make a story obvious if there will be nothing happning from minutes for example or there will be single action performed over and over - this should indicate to you that you need seek for solution to make the story interesting.
+
+It is not about you, it is about the story continuation. NEVER CLOSE CYAN WINDOW!
+NEVER CLICK ON ANY BUTTON ON THE CYAN WINDOW, THE CYAN WINDOW CANNOT BE INTERACTED WITH!
+
+ATTENTION: During story rewriting make sure to include your own ACTION you performed, its name and what has it going to do to make the story more exciting. Imagine that you will be reading that in the future, you must write a story that is readed by you in the future: this means that the story must have meaning, that it must contain elements that will be giving you a clear understanding of past without guessing. Be Strategic in Story Narration!
 """.strip()
-DEFAULT_HUD_TEXT = "FRANZ"
+DEFAULT_HUD_TEXT = "FRANZ is exploring the environment and its own capabilities."
 
 
 TOOLS = [
@@ -115,7 +131,7 @@ TOOLS = [
     {"type": "function", "function": {"name": "drag", "description": "Mouse: drag", "parameters": {"type": "object", "properties": {"x1": {"type": "integer"}, "y1": {"type": "integer"}, "x2": {"type": "integer"}, "y2": {"type": "integer"}, "story": {"type": "string"}}, "required": ["x1", "y1", "x2", "y2", "story"], "additionalProperties": False}}},
     {"type": "function", "function": {"name": "type_text", "description": "Keyboard: type", "parameters": {"type": "object", "properties": {"text": {"type": "string"}, "story": {"type": "string"}}, "required": ["text", "story"], "additionalProperties": False}}},
     {"type": "function", "function": {"name": "scroll", "description": "Screen: scroll", "parameters": {"type": "object", "properties": {"dy": {"type": "integer"}, "story": {"type": "string"}}, "required": ["dy", "story"], "additionalProperties": False}}},
-    {"type": "function", "function": {"name": "attend", "description": "Screen: attend", "parameters": {"type": "object", "properties": {"targets": {"type": "array", "minItems": 1, "maxItems": OBS_MAX_TARGETS, "items": {"type": "object", "properties": {"x": {"type": "integer"}, "y": {"type": "integer"}, "label": {"type": "string"}}, "required": ["x", "y", "label"], "additionalProperties": False}}, "story": {"type": "string"}}, "required": ["targets", "story"], "additionalProperties": False}}},
+    {"type": "function", "function": {"name": "attend", "description": "Screen: attend", "parameters": {"type": "object", "properties": {"targets": {"type": "array", "minItems": 4, "maxItems": OBS_MAX_TARGETS, "items": {"type": "object", "properties": {"x": {"type": "integer"}, "y": {"type": "integer"}, "label": {"type": "string"}}, "required": ["x", "y", "label"], "additionalProperties": False}}, "story": {"type": "string"}}, "required": ["targets", "story"], "additionalProperties": False}}},
 ]
 TOOL_NAME_SET: set[str] = {str(t["function"]["name"]).strip().lower() for t in TOOLS}
 user32 = ctypes.WinDLL("user32", use_last_error=True)
